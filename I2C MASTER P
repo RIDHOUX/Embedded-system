@@ -1,0 +1,30 @@
+#include <Wire.h>
+
+void setup() {
+  Wire.begin(); // Memulai komunikasi I2C sebagai Master
+  Serial.begin(9600);
+  
+  // Menampilkan menu di Serial Monitor Master
+  Serial.println("=== KONTROL MONITOR SLAVE ===");
+  Serial.println("Ketik '1' -> Tampilkan Cahaya");
+  Serial.println("Ketik '2' -> Tampilkan Suhu");
+  Serial.println("Ketik '3' -> Tampilkan Kelembapan");
+  Serial.println("=============================");
+}
+
+void loop() {
+  // Cek apakah ada inputan angka dari Serial Monitor Master
+  if (Serial.available() > 0) {
+    char pilihan = Serial.read();
+
+    // Hanya mengirim jika input adalah 1, 2, atau 3
+    if (pilihan == '1' || pilihan == '2' || pilihan == '3') {
+      Wire.beginTransmission(8); // Alamat I2C Slave adalah 8
+      Wire.write(pilihan);       // Mengirim karakter pilihan ke Slave
+      Wire.endTransmission();    // Mengakhiri transmisi
+      
+      Serial.print("Berhasil mengirim request: ");
+      Serial.println(pilihan);
+    }
+  }
+}
