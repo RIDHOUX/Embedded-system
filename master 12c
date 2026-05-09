@@ -1,0 +1,34 @@
+#include <Wire.h>
+#include <LiquidCrystal_I2C.h>
+
+LiquidCrystal_I2C lcd(0x27, 16, 2);
+
+int ldrPin = A0;
+int dataSlave = 0;
+
+void setup() {
+  Wire.begin();
+  lcd.init();
+  lcd.backlight();
+}
+
+void loop() {
+  int nilaiLDR = analogRead(ldrPin);
+
+  Wire.requestFrom(8, 1);
+  if (Wire.available()) {
+    dataSlave = (signed char)Wire.read();
+  }
+
+  lcd.setCursor(0, 0);
+  lcd.print("Cahaya:");
+  lcd.print(nilaiLDR);
+  lcd.print("   ");
+
+  lcd.setCursor(0, 1);
+  lcd.print("Suhu:");
+  lcd.print((int)dataSlave);
+  lcd.print(" C  ");
+
+  delay(1000);
+}
