@@ -1,0 +1,23 @@
+#include <Wire.h>
+
+int sensorPin = A0;
+int suhu = 0;
+signed char suhuKirim = 0;
+
+void setup() {
+  Wire.begin(8);
+  Wire.onRequest(kirimData);
+}
+
+void loop() {
+  int nilaiADC = analogRead(sensorPin);
+  float voltase = nilaiADC * (5.0 / 1023.0);
+  suhu = (voltase - 0.5) * 100;
+  
+  suhuKirim = (signed char)suhu;
+  delay(500);
+}
+
+void kirimData() {
+  Wire.write(suhuKirim);
+}
