@@ -1,0 +1,43 @@
+// Konfigurasi Pin Sensor (Dipindahkan sesuai permintaan)
+int pinSuhu = A2;   // Sensor TMP36 dialihkan ke pin A2
+int pinLDR = A3;    // Sensor LDR dialihkan ke pin A3
+
+char perintahMaster = '0'; 
+
+void setup() {
+  Serial.begin(9600); // Memulai komunikasi Hardware Serial (Pin 0 RX)
+}
+
+void loop() {
+  // Cek apakah ada data perintah yang masuk dari Transmitter melalui pin RX (Pin 0)
+  if (Serial.available() > 0) {
+    char dataMasuk = Serial.read();
+    if (dataMasuk == '1' || dataMasuk == '2' || dataMasuk == '3') {
+      perintahMaster = dataMasuk;
+    }
+  }
+
+  // --- PILIHAN 1: CAHAYA ---
+  if (perintahMaster == '1') {
+    int nilaiCahaya = analogRead(pinLDR);
+    Serial.print("[CAHAYA] Nilai LDR: ");
+    Serial.println(nilaiCahaya);
+  } 
+  // --- PILIHAN 2: SUHU (TMP36) ---
+  else if (perintahMaster == '2') {
+    int nilaiADC = analogRead(pinSuhu);
+    // Rumus konversi TMP36
+    float voltase = nilaiADC * (5.0 / 1023.0);
+    float suhu = (voltase - 0.5) * 100;
+    
+    Serial.print("[SUHU] Derajat: ");
+    Serial.print(suhu);
+    Serial.println(" C");
+  } 
+  // --- PILIHAN 3: KELEMBAPAN ---
+  else if (perintahMaster == '3') {
+    Serial.println("[KELEMBAPAN] Error: Sensor TMP36 tidak bisa membaca kelembapan!");
+  }
+  
+  delay(1000); 
+}
