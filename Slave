@@ -1,0 +1,61 @@
+#include <SPI.h>
+
+// Pin SPI
+const uint8_t MOSI_PIN = 11;
+const uint8_t MISO_PIN = 12;
+const uint8_t SCK_PIN = 13;
+const uint8_t SS_PIN = 10;
+
+// Konfigurasi Pin Sensor (Sesuai modifikasi sebelumnya)
+int pinSuhu = A2;   
+int pinLDR = A3;    
+
+volatile char perintahMaster = '0';
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(MOSI_PIN, INPUT);
+  pinMode(MISO_PIN, OUTPUT);
+  pinMode(SCK_PIN, INPUT);
+  pinMode(SS_PIN, INPUT_PULLUP);
+
+  // Mengaktifkan SPI mode Slave dan Interrupt
+  SPCR = _BV(SPE) | _BV(SPIE);
+  
+  Serial.println("Slave Standby. Menunggu instruksi via SPI...");
+}
+
+// ISR (Interrupt Service Routine) yang otomatis terpanggil saat ada data SPI masuk
+ISR(SPI_STC_vect) {
+  char dataMasuk = SPDR; // SPDR adalah register penyimpan data SPI
+  if (dataMasuk == '1' || dataMasuk == '2' || dataMasuk == '3') {
+    perintahMaster = dataMasuk;
+  }
+}
+
+void loop() {
+  // --- PILIHAN 1: CAHAYA ---
+  if (perintahMaster == '1') {
+    int nilaiCahaya = analogRead(pinLDR);
+    Serial.print("[CAHAYA] Nilai LDR: ");
+    Serial.println(nilaiCahaya);
+  } 
+  // --- PILIHAN 2: SUHU (TMP36) ---
+  else if (perintahMaster == '2') {
+    int nilaiADC = analogRead(pinSuhu);
+    // Rumus konversi TMP36
+    float voltase = nilaiADC * (5.0 / 1023.0);
+    float suhu = (voltase - 0.5) * 100;
+    
+    Serial.print("[SUHU] Derajat: ");
+    Serial.print(suhu);
+    Serial.println(" C");
+  } 
+  // --- PILIHAN 3: KELEMBAPAN ---
+  else if (perintahMaster == '3') {
+    Serial.println("[KELEMBAPAN] Error: Sensor TMP36 tidak bisa membaca kelembapan!");
+  }
+  
+  delay(1000); 
+}
