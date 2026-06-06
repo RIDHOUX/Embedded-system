@@ -1,0 +1,45 @@
+#include <SPI.h>
+
+const uint8_t MOSI_PIN = 11;
+const uint8_t MISO_PIN = 12;
+const uint8_t SCK_PIN = 13;
+const uint8_t SS_PIN = 10;
+
+void setup() {
+  Serial.begin(9600);
+  while (!Serial);
+
+  pinMode(MOSI_PIN, OUTPUT);
+  pinMode(MISO_PIN, INPUT);
+  pinMode(SCK_PIN, OUTPUT);
+  pinMode(SS_PIN, OUTPUT);
+
+  SPI.begin();
+  digitalWrite(SS_PIN, HIGH);
+  
+  // Menampilkan menu di Serial Monitor Master
+  Serial.println("=== KONTROL MONITOR MASTER (SPI) ===");
+  Serial.println("Ketik '1' -> Tampilkan Cahaya");
+  Serial.println("Ketik '2' -> Tampilkan Suhu");
+  Serial.println("Ketik '3' -> Tampilkan Kelembapan");
+  Serial.println("====================================");
+}
+
+void loop() {
+  if (Serial.available() > 0) {
+    char pilihan = Serial.read();
+
+    if (pilihan == '1' || pilihan == '2' || pilihan == '3') {
+      SPI.beginTransaction(SPISettings(1000000, MSBFIRST, SPI_MODE0));
+      digitalWrite(SS_PIN, LOW);
+      
+      SPI.transfer(pilihan); // Mengirim karakter pilihan ke Slave via SPI
+      
+      digitalWrite(SS_PIN, HIGH);
+      SPI.endTransaction();
+      
+      Serial.print("Berhasil mengirim request via SPI: ");
+      Serial.println(pilihan);
+    }
+  }
+}
