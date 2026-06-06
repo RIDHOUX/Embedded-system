@@ -1,0 +1,22 @@
+void setup() {
+  Serial.begin(9600); // Memulai komunikasi Hardware Serial (Pin 1 TX)
+  
+  // Menampilkan menu di Serial Monitor
+  Serial.println("=== KONTROL MONITOR TRANSMITTER ===");
+  Serial.println("Ketik '1' -> Tampilkan Cahaya");
+  Serial.println("Ketik '2' -> Tampilkan Suhu");
+  Serial.println("Ketik '3' -> Tampilkan Kelembapan");
+  Serial.println("===================================");
+}
+
+void loop() {
+  // Cek apakah ada inputan angka dari Serial Monitor PC
+  if (Serial.available() > 0) {
+    char pilihan = Serial.read();
+
+    // Hanya mengirim jika input adalah 1, 2, atau 3
+    if (pilihan == '1' || pilihan == '2' || pilihan == '3') {
+      Serial.write(pilihan); // Mengirim karakter melalui pin TX utama (Pin 1)
+    }
+  }
+}
